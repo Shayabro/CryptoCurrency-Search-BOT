@@ -1,0 +1,17 @@
+#ALPACA
+API_URL = 'https://paper-api.alpaca.markets'
+API_KEY = 'PK5XFC4GMI4WO4DYTNBA'
+API_SECRET = 'i57xv27SQK40xxi6vJNisVYBV3VimEXpkrIij37Q'
+
+#POLYGON
+POLYGON_API_KEY = "mDazPJGJnWArP7Ur0N0DVMpI8ve1fPEz"
+
+#REDDIT
+CLIENT_ID = 'sbDV60U3HpLoqWPkaMyJ0g'
+SECRET_KEY = 'V5sxbZksIu35rS2SX6BBg2tdFOkerA'
+
+#DB
+DB_HOST = 'localhost'
+DB_USER='postgres'
+DB_PASS='password'
+DB_NAME='etfdb'
