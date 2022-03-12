@@ -2,4 +2,5 @@ config.py
 experiments/*
 db/*
 data/*
+old/*
 __pycache__/*
