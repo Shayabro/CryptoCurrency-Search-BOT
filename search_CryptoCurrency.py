@@ -4,6 +4,7 @@ import threading
 import config
 import psycopg2
 import psycopg2.extras
+import time
 
 def get_timerange_comments(thread_id, currencies):
     while(True):
@@ -65,8 +66,8 @@ def main():
 def get_dates():
     dates = []
     #curr = int(datetime.datetime(2021,5,25).timestamp()) Target Date!
-    curr = int(datetime.datetime(2021,6,19).timestamp())
-    while(datetime.datetime.fromtimestamp(curr).month != 7): #Fix this Later
+    curr = int(datetime.datetime(2021,6,7).timestamp())
+    while(datetime.datetime.fromtimestamp(curr).month != 6 or datetime.datetime.fromtimestamp(curr).day != 19 ): #Fix this Later
         dates.append(curr)
         curr += 24*3600
     return dates
@@ -81,6 +82,7 @@ def get_currencies():
     return currencies
 
 #Global Enviroment
+start = time.time()
 dates = get_dates()
 currencies = get_currencies()
 dates_lock = threading.Lock()
@@ -88,3 +90,5 @@ db_lock = threading.Lock()
 connection = psycopg2.connect(host=config.DB_HOST, database = config.DB_NAME, user = config.DB_USER, password = config.DB_PASS)
 cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
 main()
+end = time.time()
+print("Took {} seconds.".format(end - start))
