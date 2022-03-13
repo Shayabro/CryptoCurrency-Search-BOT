@@ -6,12 +6,13 @@ import psycopg2
 import psycopg2.extras
 
 def get_timerange_comments(thread_id, currencies):
-    print(f" thread id {thread_id} and currencies are {currencies}")
     while(True):
         #Pop a date from the shared dates list
         dates_lock.acquire()
         if len(dates)==0:
             dates_lock.release()
+            print("_______________________")
+            print(f"Thread number {thread_id} has finished his job!")
             return
         else:
             start_time = dates.pop()
@@ -19,6 +20,7 @@ def get_timerange_comments(thread_id, currencies):
 
         #Communicating with the API
         end_time = start_time + 24*3600
+        print("_______________________")
         print(f"fetching data from {str(datetime.datetime.fromtimestamp(start_time))} to {datetime.datetime.fromtimestamp(end_time)}")
         api=PushshiftAPI()
         #comments = api.search_comments(after=start_time,before=end_time,subreddit='wallstreetbets',filter=['permalink','body','author','subreddit'])
@@ -27,17 +29,20 @@ def get_timerange_comments(thread_id, currencies):
             count = {currency:0 for currency in currencies}
             words = comment.body.split()
             for word in words:
-                if word in currencies:
-                    count[word]+=1
+                if (word in currencies) or ('$'+word in currencies):
+                    if(word[0]=='$'):
+                        word = word[1::]
+                    count[word]+=1 
                     comment_time= datetime.datetime.fromtimestamp(comment.created_utc)
                     comment_url= "https://reddit.com"+comment.permalink
                     comment_message=comment.body
+                    print("_______________________")
                     print(f"found {word} in thread number {thread_id}. The subreddit is {comment.subreddit} and the time is {str(comment_time)}")
+                    db_lock.acquire()
                     try:
-                        db_lock.acquire()
                         cursor.execute("""
                             INSERT INTO mention (dt,stock_id,message,occurence,source,url) 
-                            VALUES (%s,%s,%s,%d,%s,%s)
+                            VALUES (%s,%s,%s,%s,%s,%s)
                         """, (comment_time,currencies[word],comment_message,count[word],comment.subreddit,comment_url))
                         connection.commit()
                         db_lock.release()
@@ -59,8 +64,9 @@ def main():
 
 def get_dates():
     dates = []
-    curr = int(datetime.datetime(2021,5,25).timestamp())
-    while(datetime.datetime.fromtimestamp(curr).month != 7):
+    #curr = int(datetime.datetime(2021,5,25).timestamp()) Target Date!
+    curr = int(datetime.datetime(2021,6,19).timestamp())
+    while(datetime.datetime.fromtimestamp(curr).month != 7): #Fix this Later
         dates.append(curr)
         curr += 24*3600
     return dates
@@ -71,7 +77,6 @@ def get_currencies():
     cursor.execute("""SELECT * FROM stock""")
     currencies = {}
     for currency in cursor.fetchall():
-        #currencies['$'+currency['symbol']]=currency['id']
         currencies[currency['symbol']]=currency['id']
     return currencies
 

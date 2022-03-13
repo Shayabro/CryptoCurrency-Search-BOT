@@ -27,9 +27,11 @@ CREATE TABLE mention(
     occurence INTEGER,
     source TEXT NOT NULL,
     url TEXT NOT NULL,
-    PRIMARY KEY (stock_id, dt),
+    PRIMARY KEY (stock_id, dt, url, occurence),
     CONSTRAINT fk_mention_stock FOREIGN KEY (stock_id) REFERENCES stock (id)
 );
 
-CREATE INDEX ON mention (stock_id, dt, url DESC);
+CREATE INDEX ON mention (stock_id, dt, url, occurence DESC);
 SELECT create_hypertable('mention', 'dt');
+
+-- HyperTables 1 and 5 are relevant for me!
