@@ -29,6 +29,8 @@ def get_timerange_comments(thread_id, currencies):
         for comment in comments:
             count = {currency:0 for currency in currencies}
             words = comment.body.split()
+            print("_______________________")
+            print(f"Thread number {thread_id} working on time {str(datetime.datetime.fromtimestamp(comment.created_utc))}")
             for word in words:
                 if (word in currencies) or ('$'+word in currencies):
                     if(word[0]=='$'):
@@ -39,8 +41,8 @@ def get_timerange_comments(thread_id, currencies):
                     comment_message=comment.body
                     print("_______________________")
                     print(f"found {word} in thread number {thread_id}. The subreddit is {comment.subreddit} and the time is {str(comment_time)}")
-                    db_lock.acquire()
                     try:
+                        db_lock.acquire()
                         cursor.execute("""
                             INSERT INTO mention (dt,stock_id,message,occurence,source,url) 
                             VALUES (%s,%s,%s,%s,%s,%s)
@@ -48,7 +50,8 @@ def get_timerange_comments(thread_id, currencies):
                         connection.commit()
                         db_lock.release()
                     except Exception as e:
-                        print(e)
+                        print("_______________________")
+                        print(f"Error in writing to DB on thread number {thread_id} and time {str(datetime.datetime.now())}. The errore is: {e}")
                         connection.rollback()
                         db_lock.release()
 
@@ -66,8 +69,8 @@ def main():
 def get_dates():
     dates = []
     #curr = int(datetime.datetime(2021,5,25).timestamp()) Target Date!
-    curr = int(datetime.datetime(2021,6,7).timestamp())
-    while(datetime.datetime.fromtimestamp(curr).month != 6 or datetime.datetime.fromtimestamp(curr).day != 19 ): #Fix this Later
+    curr = int(datetime.datetime(2021,5,26).timestamp()) 
+    while(datetime.datetime.fromtimestamp(curr).month != 6 or datetime.datetime.fromtimestamp(curr).day != 7 ): #Fix this Later
         dates.append(curr)
         curr += 24*3600
     return dates
